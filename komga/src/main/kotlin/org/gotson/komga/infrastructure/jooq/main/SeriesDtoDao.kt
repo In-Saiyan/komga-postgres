@@ -80,9 +80,9 @@ class SeriesDtoDao(
       *rs.fields(),
     )
 
-  private val sorts =
-    mapOf(
-      "metadata.titleSort" to d.TITLE_SORT.collate(SqliteUdfDataSource.COLLATION_UNICODE_3),
+  private val sorts
+    get() = mapOf(
+      "metadata.titleSort" to collationHelper.collateUnicode(d.TITLE_SORT),
       "createdDate" to s.CREATED_DATE,
       "created" to s.CREATED_DATE,
       "lastModifiedDate" to s.LAST_MODIFIED_DATE,
@@ -90,7 +90,7 @@ class SeriesDtoDao(
       "booksMetadata.releaseDate" to bma.RELEASE_DATE,
       "readDate" to rs.MOST_RECENT_READ_DATE,
       "collection.number" to cs.NUMBER,
-      "name" to s.NAME.collate(SqliteUdfDataSource.COLLATION_UNICODE_3),
+      "name" to collationHelper.collateUnicode(s.NAME),
       "booksCount" to s.BOOK_COUNT,
       "random" to DSL.rand(),
     )

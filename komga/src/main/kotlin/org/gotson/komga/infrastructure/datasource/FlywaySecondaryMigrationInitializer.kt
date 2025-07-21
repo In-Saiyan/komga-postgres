@@ -15,7 +15,7 @@ class FlywaySecondaryMigrationInitializer(
   override fun afterPropertiesSet() {
     Flyway
       .configure()
-      .locations("classpath:tasks/migration/sqlite")
+      .locations("classpath:tasks/migration/postgres")
       .dataSource(tasksDataSource)
       .load()
       .apply {

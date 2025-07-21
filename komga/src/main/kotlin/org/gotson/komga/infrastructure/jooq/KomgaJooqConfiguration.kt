@@ -40,7 +40,7 @@ class KomgaJooqConfiguration {
     executeListenerProviders: ObjectProvider<ExecuteListenerProvider?>,
   ) = DefaultDSLContext(
     DefaultConfiguration().also { configuration ->
-      configuration.set(SQLDialect.SQLITE)
+      configuration.set(SQLDialect.POSTGRES)
       configuration.set(DataSourceConnectionProvider(TransactionAwareDataSourceProxy(dataSource)))
       transactionProvider.ifAvailable { newTransactionProvider: TransactionProvider? -> configuration.set(newTransactionProvider) }
       configuration.set(*executeListenerProviders.orderedStream().toList().toTypedArray())
