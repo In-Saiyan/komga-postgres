@@ -9,7 +9,7 @@ services:
       POSTGRES_DB: komga
       POSTGRES_USER: komga
       POSTGRES_PASSWORD: komga_password
-      POSTGRES_INIT DB_ARGS: "--encoding=UTF8 --locale=C"
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     ports:
       - "5433:5432"
     networks:
@@ -20,6 +20,30 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # Create additional databases
+  postgres-setup:
+    image: postgres:16-alpine
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: komga
+      PGPASSWORD: komga_password
+      PGDATABASE: komga
+    networks:
+      - komga-network
+    command: |
+      sh -c "
+        echo 'Creating additional databases...'
+        psql -v ON_ERROR_STOP=1 -c 'CREATE DATABASE komga_tasks OWNER komga;' || echo 'komga_tasks already exists'
+        psql -v ON_ERROR_STOP=1 -c 'CREATE DATABASE komga_localdb OWNER komga;' || echo 'komga_localdb already exists'
+        psql -v ON_ERROR_STOP=1 -c 'CREATE DATABASE komga_localdb_tasks OWNER komga;' || echo 'komga_localdb_tasks already exists'
+        echo 'Database setup completed!'
+      "
+    restart: "no"
 
   # Optional: pgAdmin for database management
   pgadmin:

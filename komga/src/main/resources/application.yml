@@ -16,14 +16,20 @@ logging:
 
 komga:
   database:
-    file: \${komga.config-dir}/database.sqlite
+    url: jdbc:postgresql://localhost:5433/komga
+    username: komga
+    password: komga_password
+    driver-class-name: org.postgresql.Driver
+  tasks-db:
+    url: jdbc:postgresql://localhost:5433/komga_tasks
+    username: komga
+    password: komga_password  
+    driver-class-name: org.postgresql.Driver
   lucene:
     data-directory: \${komga.config-dir}/lucene
   fonts:
     data-directory: \${komga.config-dir}/fonts
   config-dir: \${user.home}/.komga
-  tasks-db:
-    file: \${komga.config-dir}/tasks.sqlite
 
 spring:
   codec:
