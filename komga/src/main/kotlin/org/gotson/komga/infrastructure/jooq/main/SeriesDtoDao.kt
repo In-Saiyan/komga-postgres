@@ -3,7 +3,7 @@ package org.gotson.komga.infrastructure.jooq.main
 import org.gotson.komga.domain.model.SearchContext
 import org.gotson.komga.domain.model.SearchField
 import org.gotson.komga.domain.model.SeriesSearch
-import org.gotson.komga.infrastructure.datasource.SqliteUdfDataSource
+import org.gotson.komga.infrastructure.jooq.DatabaseCollationHelper
 import org.gotson.komga.infrastructure.jooq.RequiredJoin
 import org.gotson.komga.infrastructure.jooq.SeriesSearchHelper
 import org.gotson.komga.infrastructure.jooq.csAlias
@@ -55,6 +55,7 @@ const val BOOKS_READ_COUNT = "booksReadCount"
 class SeriesDtoDao(
   private val dsl: DSLContext,
   private val luceneHelper: LuceneHelper,
+  private val collationHelper: DatabaseCollationHelper,
   @param:Value("#{@komgaProperties.database.batchChunkSize}") private val batchSize: Int,
   private val transactionTemplate: TransactionTemplate,
 ) : SeriesDtoRepository {
@@ -108,7 +109,7 @@ class SeriesDtoDao(
   ): Page<SeriesDto> {
     requireNotNull(context.userId) { "Missing userId in search context" }
 
-    val (conditions, joins) = SeriesSearchHelper(context).toCondition(search.condition)
+    val (conditions, joins) = SeriesSearchHelper(context, collationHelper).toCondition(search.condition)
     val conditionsRefined = conditions.and(search.regexSearch?.let { it.second.toColumn().likeRegex(it.first) } ?: DSL.noCondition())
 
     return findAll(conditionsRefined, context.userId, pageable, joins, search.fullTextSearch)
@@ -121,7 +122,7 @@ class SeriesDtoDao(
   ): Page<SeriesDto> {
     requireNotNull(context.userId) { "Missing userId in search context" }
 
-    val (conditions, joins) = SeriesSearchHelper(context).toCondition(search.condition)
+    val (conditions, joins) = SeriesSearchHelper(context, collationHelper).toCondition(search.condition)
     val conditionsRefined = conditions.and(s.CREATED_DATE.notEqual(s.LAST_MODIFIED_DATE))
 
     return findAll(conditionsRefined, context.userId, pageable, joins, search.fullTextSearch)
@@ -133,7 +134,7 @@ class SeriesDtoDao(
   ): List<GroupCountDto> {
     requireNotNull(context.userId) { "Missing userId in search context" }
 
-    val (conditions, joins) = SeriesSearchHelper(context).toCondition(search.condition)
+    val (conditions, joins) = SeriesSearchHelper(context, collationHelper).toCondition(search.condition)
     val conditionsRefined = conditions.and(search.regexSearch?.let { it.second.toColumn().likeRegex(it.first) } ?: DSL.noCondition())
 
     val seriesIds = luceneHelper.searchEntitiesIds(search.fullTextSearch, LuceneEntity.Series)

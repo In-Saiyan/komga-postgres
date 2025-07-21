@@ -2,7 +2,7 @@ package org.gotson.komga.infrastructure.jooq.main
 
 import org.gotson.komga.domain.model.Author
 import org.gotson.komga.domain.persistence.ReferentialRepository
-import org.gotson.komga.infrastructure.datasource.SqliteUdfDataSource
+import org.gotson.komga.infrastructure.jooq.DatabaseCollationHelper
 import org.gotson.komga.infrastructure.jooq.udfStripAccents
 import org.gotson.komga.jooq.main.Tables
 import org.gotson.komga.jooq.main.tables.records.BookMetadataAggregationAuthorRecord
@@ -22,6 +22,7 @@ import java.time.LocalDate
 @Component
 class ReferentialDao(
   private val dsl: DSLContext,
+  private val collationHelper: DatabaseCollationHelper,
 ) : ReferentialRepository {
   private val a = Tables.BOOK_METADATA_AUTHOR
   private val sd = Tables.SERIES_METADATA
@@ -47,7 +48,7 @@ class ReferentialDao(
       .apply { filterOnLibraryIds?.let { leftJoin(b).on(a.BOOK_ID.eq(b.ID)) } }
       .where(a.NAME.udfStripAccents().containsIgnoreCase(search.stripAccents()))
       .apply { filterOnLibraryIds?.let { and(b.LIBRARY_ID.`in`(it)) } }
-      .orderBy(a.NAME.collate(SqliteUdfDataSource.COLLATION_UNICODE_3))
+      .orderBy(collationHelper.collateUnicode(a.NAME))
       .fetchInto(a)
       .map { it.toDomain() }
 

@@ -4,8 +4,8 @@ import org.gotson.komga.domain.model.BookSearch
 import org.gotson.komga.domain.model.ContentRestrictions
 import org.gotson.komga.domain.model.ReadList
 import org.gotson.komga.domain.model.SearchContext
-import org.gotson.komga.infrastructure.datasource.SqliteUdfDataSource
 import org.gotson.komga.infrastructure.jooq.BookSearchHelper
+import org.gotson.komga.infrastructure.jooq.DatabaseCollationHelper
 import org.gotson.komga.infrastructure.jooq.RequiredJoin
 import org.gotson.komga.infrastructure.jooq.insertTempStrings
 import org.gotson.komga.infrastructure.jooq.noCase
@@ -53,6 +53,7 @@ import java.net.URL
 class BookDtoDao(
   private val dsl: DSLContext,
   private val luceneHelper: LuceneHelper,
+  private val collationHelper: DatabaseCollationHelper,
   @param:Value("#{@komgaProperties.database.batchChunkSize}") private val batchSize: Int,
   private val transactionTemplate: TransactionTemplate,
   private val bookCommonDao: BookCommonDao,
@@ -69,10 +70,10 @@ class BookDtoDao(
 
   private val onDeckFields = b.fields() + m.fields() + d.fields() + r.fields() + sd.TITLE
 
-  private val sorts =
-    mapOf(
-      "name" to b.NAME.collate(SqliteUdfDataSource.COLLATION_UNICODE_3),
-      "series" to sd.TITLE_SORT.collate(SqliteUdfDataSource.COLLATION_UNICODE_3),
+  private val sorts
+    get() = mapOf(
+      "name" to collationHelper.collateUnicode(b.NAME),
+      "series" to collationHelper.collateUnicode(sd.TITLE_SORT),
       "created" to b.CREATED_DATE,
       "createdDate" to b.CREATED_DATE,
       "lastModified" to b.LAST_MODIFIED_DATE,
@@ -107,7 +108,7 @@ class BookDtoDao(
   ): Page<BookDto> {
     requireNotNull(context.userId) { "Missing userId in search context" }
 
-    val (conditions, joins) = BookSearchHelper(context).toCondition(search.condition)
+    val (conditions, joins) = BookSearchHelper(context, collationHelper).toCondition(search.condition)
     return findAll(conditions, context.userId, pageable, search.fullTextSearch, joins)
   }
 

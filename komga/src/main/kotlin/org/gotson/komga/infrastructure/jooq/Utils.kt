@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.gotson.komga.domain.model.AllowExclude
 import org.gotson.komga.domain.model.ContentRestrictions
 import org.gotson.komga.domain.model.MediaExtension
-import org.gotson.komga.infrastructure.datasource.SqliteUdfDataSource
 import org.gotson.komga.jooq.main.Tables
 import org.jooq.Condition
 import org.jooq.DSLContext
@@ -45,7 +44,11 @@ fun Field<String>.inOrNoCondition(list: Collection<String>?): Condition =
     else -> this.`in`(list)
   }
 
-fun Field<String>.udfStripAccents() = DSL.function(SqliteUdfDataSource.UDF_STRIP_ACCENTS, String::class.java, this)
+/**
+ * PostgreSQL unaccent function to remove accents from text.
+ * Requires the unaccent extension to be installed in PostgreSQL.
+ */
+fun Field<String>.udfStripAccents() = DSL.function("unaccent", String::class.java, this)
 
 fun DSLContext.insertTempStrings(
   batchSize: Int,

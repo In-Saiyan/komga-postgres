@@ -7,20 +7,19 @@ import org.springframework.boot.jdbc.DataSourceBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
-import org.sqlite.SQLiteDataSource
 import javax.sql.DataSource
 
 @Configuration
 class DataSourcesConfiguration(
   private val komgaProperties: KomgaProperties,
 ) {
-  @Bean("sqliteDataSource")
+  @Bean("mainDataSource")
   @Primary
-  fun sqliteDataSource(): DataSource = buildDataSource("SqliteMainPool", SqliteUdfDataSource::class.java, komgaProperties.database)
+  fun mainDataSource(): DataSource = buildDataSource("MainPool", komgaProperties.database)
 
   @Bean("tasksDataSource")
   fun tasksDataSource(): DataSource =
-    buildDataSource("SqliteTasksPool", SQLiteDataSource::class.java, komgaProperties.tasksDb)
+    buildDataSource("TasksPool", komgaProperties.tasksDb)
       .apply {
         // force pool size to 1 for tasks datasource
         this.maximumPoolSize = 1
@@ -28,41 +27,11 @@ class DataSourcesConfiguration(
 
   private fun buildDataSource(
     poolName: String,
-    dataSourceClass: Class<out SQLiteDataSource>,
     databaseProps: KomgaProperties.Database,
   ): HikariDataSource {
-    val extraPragmas =
-      databaseProps.pragmas.let {
-        if (it.isEmpty())
-          ""
-        else
-          "?" + it.map { (key, value) -> "$key=$value" }.joinToString(separator = "&")
-      }
+    val dataSource = createDataSource(databaseProps)
 
-    val dataSource =
-      DataSourceBuilder
-        .create()
-        .driverClassName("org.sqlite.JDBC")
-        .url("jdbc:sqlite:${databaseProps.file}$extraPragmas")
-        .type(dataSourceClass)
-        .build()
-
-    with(dataSource) {
-      setEnforceForeignKeys(true)
-      setGetGeneratedKeys(false)
-    }
-    with(databaseProps) {
-      journalMode?.let { dataSource.setJournalMode(it.name) }
-      busyTimeout?.let { dataSource.config.busyTimeout = it.toMillis().toInt() }
-    }
-
-    val poolSize =
-      if (databaseProps.file.contains(":memory:") || databaseProps.file.contains("mode=memory"))
-        1
-      else if (databaseProps.poolSize != null)
-        databaseProps.poolSize!!
-      else
-        Runtime.getRuntime().availableProcessors().coerceAtMost(databaseProps.maxPoolSize)
+    val poolSize = calculatePoolSize(databaseProps)
 
     return HikariDataSource(
       HikariConfig().apply {
@@ -71,5 +40,24 @@ class DataSourcesConfiguration(
         this.maximumPoolSize = poolSize
       },
     )
+  }
+
+  private fun createDataSource(databaseProps: KomgaProperties.Database): DataSource {
+    return DataSourceBuilder
+      .create()
+      .driverClassName(databaseProps.driverClassName ?: "org.postgresql.Driver")
+      .url(databaseProps.url ?: throw IllegalArgumentException("Database URL must be specified"))
+      .username(databaseProps.username)
+      .password(databaseProps.password)
+      .build()
+  }
+
+  private fun calculatePoolSize(databaseProps: KomgaProperties.Database): Int {
+    return when {
+      // Use explicit pool size if specified
+      databaseProps.poolSize != null -> databaseProps.poolSize!!
+      // Default calculation based on CPU cores
+      else -> Runtime.getRuntime().availableProcessors().coerceAtMost(databaseProps.maxPoolSize)
+    }
   }
 }

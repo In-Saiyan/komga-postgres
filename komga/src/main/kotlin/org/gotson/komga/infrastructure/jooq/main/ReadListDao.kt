@@ -3,7 +3,7 @@ package org.gotson.komga.infrastructure.jooq.main
 import org.gotson.komga.domain.model.ContentRestrictions
 import org.gotson.komga.domain.model.ReadList
 import org.gotson.komga.domain.persistence.ReadListRepository
-import org.gotson.komga.infrastructure.datasource.SqliteUdfDataSource
+import org.gotson.komga.infrastructure.jooq.DatabaseCollationHelper
 import org.gotson.komga.infrastructure.jooq.inOrNoCondition
 import org.gotson.komga.infrastructure.jooq.insertTempStrings
 import org.gotson.komga.infrastructure.jooq.selectTempStrings
@@ -34,6 +34,7 @@ import java.util.SortedMap
 class ReadListDao(
   private val dsl: DSLContext,
   private val luceneHelper: LuceneHelper,
+  private val collationHelper: DatabaseCollationHelper,
   @param:Value("#{@komgaProperties.database.batchChunkSize}") private val batchSize: Int,
 ) : ReadListRepository {
   private val rl = Tables.READLIST
@@ -41,9 +42,9 @@ class ReadListDao(
   private val b = Tables.BOOK
   private val sd = Tables.SERIES_METADATA
 
-  private val sorts =
-    mapOf(
-      "name" to rl.NAME.collate(SqliteUdfDataSource.COLLATION_UNICODE_3),
+  private val sorts
+    get() = mapOf(
+      "name" to collationHelper.collateUnicode(rl.NAME),
       "createdDate" to rl.CREATED_DATE,
       "lastModifiedDate" to rl.LAST_MODIFIED_DATE,
     )

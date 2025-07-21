@@ -7,7 +7,6 @@ import org.gotson.komga.domain.model.ReadStatus
 import org.gotson.komga.domain.model.SearchCondition
 import org.gotson.komga.domain.model.SearchContext
 import org.gotson.komga.domain.model.SearchOperator
-import org.gotson.komga.infrastructure.datasource.SqliteUdfDataSource
 import org.gotson.komga.infrastructure.jooq.RequiredJoin.ReadProgress
 import org.gotson.komga.jooq.main.Tables
 import org.jooq.Condition
@@ -20,6 +19,7 @@ private val logger = KotlinLogging.logger {}
  */
 class BookSearchHelper(
   val context: SearchContext,
+  private val collationHelper: DatabaseCollationHelper,
 ) : ContentRestrictionsSearchHelper() {
   fun toCondition(searchCondition: SearchCondition.Book?): Pair<Condition, Set<RequiredJoin>> {
     val base = toCondition()
@@ -148,8 +148,7 @@ class BookSearchHelper(
               .select(Tables.BOOK_METADATA_TAG.BOOK_ID)
               .from(Tables.BOOK_METADATA_TAG)
               .where(
-                Tables.BOOK_METADATA_TAG.TAG
-                  .collate(SqliteUdfDataSource.COLLATION_UNICODE_3)
+                collationHelper.collateUnicode(Tables.BOOK_METADATA_TAG.TAG)
                   .equalIgnoreCase(tag),
               )
           }
@@ -178,15 +177,13 @@ class BookSearchHelper(
               .apply {
                 if (name != null)
                   and(
-                    Tables.BOOK_METADATA_AUTHOR.NAME
-                      .collate(SqliteUdfDataSource.COLLATION_UNICODE_3)
+                    collationHelper.collateUnicode(Tables.BOOK_METADATA_AUTHOR.NAME)
                       .equalIgnoreCase(name),
                   )
               }.apply {
                 if (role != null)
                   and(
-                    Tables.BOOK_METADATA_AUTHOR.ROLE
-                      .collate(SqliteUdfDataSource.COLLATION_UNICODE_3)
+                    collationHelper.collateUnicode(Tables.BOOK_METADATA_AUTHOR.ROLE)
                       .equalIgnoreCase(role),
                   )
               }
