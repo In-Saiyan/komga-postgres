@@ -107,8 +107,8 @@ dependencies {
 
   implementation("com.github.ben-manes.caffeine:caffeine")
 
-  implementation("org.xerial:sqlite-jdbc:3.50.2.0")
-  jooqGenerator("org.xerial:sqlite-jdbc:3.50.2.0")
+  implementation("org.postgresql:postgresql:42.7.4")
+  jooqGenerator("org.postgresql:postgresql:42.7.4")
 
   if (version.toString().endsWith(".0.0")) {
     ksp("com.github.gotson.bestbefore:bestbefore-processor-kotlin:0.1.0")
@@ -247,29 +247,31 @@ springBoot {
   }
 }
 
-val sqliteUrls =
+val postgresUrls =
   mapOf(
-    "main" to "jdbc:sqlite:${project.layout.buildDirectory.get()}/generated/flyway/main/database.sqlite",
-    "tasks" to "jdbc:sqlite:${project.layout.buildDirectory.get()}/generated/flyway/tasks/tasks.sqlite",
+    "main" to "jdbc:postgresql://localhost:5433/komga",
+    "tasks" to "jdbc:postgresql://localhost:5433/komga_tasks",
   )
-val sqliteMigrationDirs =
+val postgresMigrationDirs =
   mapOf(
     "main" to
       listOf(
-        "$projectDir/src/flyway/resources/db/migration/sqlite",
-        "$projectDir/src/flyway/kotlin/db/migration/sqlite",
+        "$projectDir/src/flyway/resources/db/migration/postgresql",
+        "$projectDir/src/flyway/kotlin/db/migration/postgresql",
       ),
     "tasks" to
       listOf(
-        "$projectDir/src/flyway/resources/tasks/migration/sqlite",
-//    "$projectDir/src/flyway/kotlin/tasks/migration/sqlite",
+        "$projectDir/src/flyway/resources/tasks/migration/postgresql",
+//    "$projectDir/src/flyway/kotlin/tasks/migration/postgresql",
       ),
   )
 
 tasks.register("flywayMigrateMain", FlywayMigrateTask::class) {
   val id = "main"
-  url = sqliteUrls[id]
-  locations = arrayOf("classpath:db/migration/sqlite")
+  url = postgresUrls[id]
+  user = "komga"
+  password = "komga_password"
+  locations = arrayOf("classpath:db/migration/postgresql")
   placeholders =
     mapOf(
       "library-file-hashing" to "true",
@@ -279,7 +281,7 @@ tasks.register("flywayMigrateMain", FlywayMigrateTask::class) {
     )
   // in order to include the Java migrations, flywayClasses must be run before flywayMigrate
   dependsOn("flywayClasses")
-  sqliteMigrationDirs[id]?.forEach { inputs.dir(it) }
+  postgresMigrationDirs[id]?.forEach { inputs.dir(it) }
   outputs.dir("${project.layout.buildDirectory.get()}/generated/flyway/$id")
   doFirst {
     delete(outputs.files)
@@ -290,11 +292,13 @@ tasks.register("flywayMigrateMain", FlywayMigrateTask::class) {
 
 tasks.register("flywayMigrateTasks", FlywayMigrateTask::class) {
   val id = "tasks"
-  url = sqliteUrls[id]
-  locations = arrayOf("classpath:tasks/migration/sqlite")
+  url = postgresUrls[id]
+  user = "komga"
+  password = "komga_password"
+  locations = arrayOf("classpath:tasks/migration/postgresql")
   // in order to include the Java migrations, flywayClasses must be run before flywayMigrate
   dependsOn("flywayClasses")
-  sqliteMigrationDirs[id]?.forEach { inputs.dir(it) }
+  postgresMigrationDirs[id]?.forEach { inputs.dir(it) }
   outputs.dir("${project.layout.buildDirectory.get()}/generated/flyway/$id")
   doFirst {
     delete(outputs.files)
@@ -318,12 +322,14 @@ jooq {
       jooqConfiguration.apply {
         logging = org.jooq.meta.jaxb.Logging.WARN
         jdbc.apply {
-          driver = "org.sqlite.JDBC"
-          url = sqliteUrls["main"]
+          driver = "org.postgresql.Driver"
+          url = postgresUrls["main"]
+          user = "komga"
+          password = "komga_password"
         }
         generator.apply {
           database.apply {
-            name = "org.jooq.meta.sqlite.SQLiteDatabase"
+            name = "org.jooq.meta.postgres.PostgresDatabase"
           }
           target.apply {
             packageName = "org.gotson.komga.jooq.main"
@@ -335,12 +341,14 @@ jooq {
       jooqConfiguration.apply {
         logging = org.jooq.meta.jaxb.Logging.WARN
         jdbc.apply {
-          driver = "org.sqlite.JDBC"
-          url = sqliteUrls["tasks"]
+          driver = "org.postgresql.Driver"
+          url = postgresUrls["tasks"]
+          user = "komga"
+          password = "komga_password"
         }
         generator.apply {
           database.apply {
-            name = "org.jooq.meta.sqlite.SQLiteDatabase"
+            name = "org.jooq.meta.postgres.PostgresDatabase"
           }
           target.apply {
             packageName = "org.gotson.komga.jooq.tasks"
@@ -351,12 +359,12 @@ jooq {
   }
 }
 tasks.named<JooqGenerate>("generateJooq") {
-  sqliteMigrationDirs["main"]?.forEach { inputs.dir(it) }
+  postgresMigrationDirs["main"]?.forEach { inputs.dir(it) }
   allInputsDeclared = true
   dependsOn("flywayMigrateMain")
 }
 tasks.named<JooqGenerate>("generateTasksJooq") {
-  sqliteMigrationDirs["tasks"]?.forEach { inputs.dir(it) }
+  postgresMigrationDirs["tasks"]?.forEach { inputs.dir(it) }
   allInputsDeclared = true
   dependsOn("flywayMigrateTasks")
 }
