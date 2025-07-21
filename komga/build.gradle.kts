@@ -54,6 +54,7 @@ dependencies {
   kapt("org.springframework.boot:spring-boot-configuration-processor:3.5.3")
 
   implementation("org.flywaydb:flyway-core")
+  implementation("org.flywaydb:flyway-database-postgresql")
 
   api("io.github.oshai:kotlin-logging-jvm:7.0.7")
 
