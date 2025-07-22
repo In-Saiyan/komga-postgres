@@ -5,7 +5,6 @@ import org.gotson.komga.domain.model.SearchCondition
 import org.gotson.komga.domain.model.SearchContext
 import org.gotson.komga.domain.persistence.BookRepository
 import org.gotson.komga.infrastructure.jooq.BookSearchHelper
-import org.gotson.komga.infrastructure.jooq.DatabaseCollationHelper
 import org.gotson.komga.infrastructure.jooq.RequiredJoin
 import org.gotson.komga.infrastructure.jooq.insertTempStrings
 import org.gotson.komga.infrastructure.jooq.rlbAlias
@@ -33,7 +32,6 @@ import java.time.ZoneId
 @Component
 class BookDao(
   private val dsl: DSLContext,
-  private val collationHelper: DatabaseCollationHelper,
   @param:Value("#{@komgaProperties.database.batchChunkSize}") private val batchSize: Int,
 ) : BookRepository {
   private val b = Tables.BOOK
@@ -126,7 +124,7 @@ class BookDao(
     searchContext: SearchContext,
     pageable: Pageable,
   ): Page<Book> {
-    val bookCondition = BookSearchHelper(searchContext, collationHelper).toCondition(searchCondition)
+    val bookCondition = BookSearchHelper(searchContext).toCondition(searchCondition)
     return findAll(bookCondition.first, bookCondition.second, pageable)
   }
 

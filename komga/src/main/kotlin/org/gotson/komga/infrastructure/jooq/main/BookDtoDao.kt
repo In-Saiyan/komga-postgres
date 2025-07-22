@@ -5,7 +5,6 @@ import org.gotson.komga.domain.model.ContentRestrictions
 import org.gotson.komga.domain.model.ReadList
 import org.gotson.komga.domain.model.SearchContext
 import org.gotson.komga.infrastructure.jooq.BookSearchHelper
-import org.gotson.komga.infrastructure.jooq.DatabaseCollationHelper
 import org.gotson.komga.infrastructure.jooq.RequiredJoin
 import org.gotson.komga.infrastructure.jooq.insertTempStrings
 import org.gotson.komga.infrastructure.jooq.noCase
@@ -53,7 +52,6 @@ import java.net.URL
 class BookDtoDao(
   private val dsl: DSLContext,
   private val luceneHelper: LuceneHelper,
-  private val collationHelper: DatabaseCollationHelper,
   @param:Value("#{@komgaProperties.database.batchChunkSize}") private val batchSize: Int,
   private val transactionTemplate: TransactionTemplate,
   private val bookCommonDao: BookCommonDao,
@@ -71,28 +69,29 @@ class BookDtoDao(
   private val onDeckFields = b.fields() + m.fields() + d.fields() + r.fields() + sd.TITLE
 
   private val sorts
-    get() = mapOf(
-      "name" to collationHelper.collateUnicode(b.NAME),
-      "series" to collationHelper.collateUnicode(sd.TITLE_SORT),
-      "created" to b.CREATED_DATE,
-      "createdDate" to b.CREATED_DATE,
-      "lastModified" to b.LAST_MODIFIED_DATE,
-      "lastModifiedDate" to b.LAST_MODIFIED_DATE,
-      "fileSize" to b.FILE_SIZE,
-      "size" to b.FILE_SIZE,
-      "fileHash" to b.FILE_HASH,
-      "url" to b.URL.noCase(),
-      "media.status" to m.STATUS.noCase(),
-      "media.comment" to m.COMMENT.noCase(),
-      "media.mediaType" to m.MEDIA_TYPE.noCase(),
-      "media.pagesCount" to m.PAGE_COUNT,
-      "metadata.title" to collationHelper.collateUnicode(d.TITLE),
-      "metadata.numberSort" to d.NUMBER_SORT,
-      "metadata.releaseDate" to d.RELEASE_DATE,
-      "readProgress.lastModified" to r.LAST_MODIFIED_DATE,
-      "readProgress.readDate" to r.READ_DATE,
-      "readList.number" to rlb.NUMBER,
-    )
+    get() =
+      mapOf(
+        "name" to b.NAME,
+        "series" to sd.TITLE_SORT,
+        "created" to b.CREATED_DATE,
+        "createdDate" to b.CREATED_DATE,
+        "lastModified" to b.LAST_MODIFIED_DATE,
+        "lastModifiedDate" to b.LAST_MODIFIED_DATE,
+        "fileSize" to b.FILE_SIZE,
+        "size" to b.FILE_SIZE,
+        "fileHash" to b.FILE_HASH,
+        "url" to b.URL.noCase(),
+        "media.status" to m.STATUS.noCase(),
+        "media.comment" to m.COMMENT.noCase(),
+        "media.mediaType" to m.MEDIA_TYPE.noCase(),
+        "media.pagesCount" to m.PAGE_COUNT,
+        "metadata.title" to d.TITLE,
+        "metadata.numberSort" to d.NUMBER_SORT,
+        "metadata.releaseDate" to d.RELEASE_DATE,
+        "readProgress.lastModified" to r.LAST_MODIFIED_DATE,
+        "readProgress.readDate" to r.READ_DATE,
+        "readList.number" to rlb.NUMBER,
+      )
 
   override fun findAll(pageable: Pageable): Page<BookDto> = findAll(BookSearch(), SearchContext.ofAnonymousUser(), pageable)
 
@@ -108,7 +107,7 @@ class BookDtoDao(
   ): Page<BookDto> {
     requireNotNull(context.userId) { "Missing userId in search context" }
 
-    val (conditions, joins) = BookSearchHelper(context, collationHelper).toCondition(search.condition)
+    val (conditions, joins) = BookSearchHelper(context).toCondition(search.condition)
     return findAll(conditions, context.userId, pageable, search.fullTextSearch, joins)
   }
 

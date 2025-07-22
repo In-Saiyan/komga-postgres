@@ -3,7 +3,6 @@ package org.gotson.komga.infrastructure.jooq.main
 import org.gotson.komga.domain.model.SearchContext
 import org.gotson.komga.domain.model.SearchField
 import org.gotson.komga.domain.model.SeriesSearch
-import org.gotson.komga.infrastructure.jooq.DatabaseCollationHelper
 import org.gotson.komga.infrastructure.jooq.RequiredJoin
 import org.gotson.komga.infrastructure.jooq.SeriesSearchHelper
 import org.gotson.komga.infrastructure.jooq.csAlias
@@ -55,7 +54,6 @@ const val BOOKS_READ_COUNT = "booksReadCount"
 class SeriesDtoDao(
   private val dsl: DSLContext,
   private val luceneHelper: LuceneHelper,
-  private val collationHelper: DatabaseCollationHelper,
   @param:Value("#{@komgaProperties.database.batchChunkSize}") private val batchSize: Int,
   private val transactionTemplate: TransactionTemplate,
 ) : SeriesDtoRepository {
@@ -81,19 +79,20 @@ class SeriesDtoDao(
     )
 
   private val sorts
-    get() = mapOf(
-      "metadata.titleSort" to collationHelper.collateUnicode(d.TITLE_SORT),
-      "createdDate" to s.CREATED_DATE,
-      "created" to s.CREATED_DATE,
-      "lastModifiedDate" to s.LAST_MODIFIED_DATE,
-      "lastModified" to s.LAST_MODIFIED_DATE,
-      "booksMetadata.releaseDate" to bma.RELEASE_DATE,
-      "readDate" to rs.MOST_RECENT_READ_DATE,
-      "collection.number" to cs.NUMBER,
-      "name" to collationHelper.collateUnicode(s.NAME),
-      "booksCount" to s.BOOK_COUNT,
-      "random" to DSL.rand(),
-    )
+    get() =
+      mapOf(
+        "metadata.titleSort" to d.TITLE_SORT,
+        "createdDate" to s.CREATED_DATE,
+        "created" to s.CREATED_DATE,
+        "lastModifiedDate" to s.LAST_MODIFIED_DATE,
+        "lastModified" to s.LAST_MODIFIED_DATE,
+        "booksMetadata.releaseDate" to bma.RELEASE_DATE,
+        "readDate" to rs.MOST_RECENT_READ_DATE,
+        "collection.number" to cs.NUMBER,
+        "name" to s.NAME,
+        "booksCount" to s.BOOK_COUNT,
+        "random" to DSL.rand(),
+      )
 
   override fun findAll(pageable: Pageable): Page<SeriesDto> = findAll(SeriesSearch(), SearchContext.ofAnonymousUser(), pageable)
 
@@ -109,7 +108,7 @@ class SeriesDtoDao(
   ): Page<SeriesDto> {
     requireNotNull(context.userId) { "Missing userId in search context" }
 
-    val (conditions, joins) = SeriesSearchHelper(context, collationHelper).toCondition(search.condition)
+    val (conditions, joins) = SeriesSearchHelper(context).toCondition(search.condition)
     val conditionsRefined = conditions.and(search.regexSearch?.let { it.second.toColumn().likeRegex(it.first) } ?: DSL.noCondition())
 
     return findAll(conditionsRefined, context.userId, pageable, joins, search.fullTextSearch)
@@ -122,7 +121,7 @@ class SeriesDtoDao(
   ): Page<SeriesDto> {
     requireNotNull(context.userId) { "Missing userId in search context" }
 
-    val (conditions, joins) = SeriesSearchHelper(context, collationHelper).toCondition(search.condition)
+    val (conditions, joins) = SeriesSearchHelper(context).toCondition(search.condition)
     val conditionsRefined = conditions.and(s.CREATED_DATE.notEqual(s.LAST_MODIFIED_DATE))
 
     return findAll(conditionsRefined, context.userId, pageable, joins, search.fullTextSearch)
@@ -134,7 +133,7 @@ class SeriesDtoDao(
   ): List<GroupCountDto> {
     requireNotNull(context.userId) { "Missing userId in search context" }
 
-    val (conditions, joins) = SeriesSearchHelper(context, collationHelper).toCondition(search.condition)
+    val (conditions, joins) = SeriesSearchHelper(context).toCondition(search.condition)
     val conditionsRefined = conditions.and(search.regexSearch?.let { it.second.toColumn().likeRegex(it.first) } ?: DSL.noCondition())
 
     val seriesIds = luceneHelper.searchEntitiesIds(search.fullTextSearch, LuceneEntity.Series)

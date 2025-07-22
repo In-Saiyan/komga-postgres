@@ -47,22 +47,20 @@ class DataSourcesConfiguration(
     )
   }
 
-  private fun createDataSource(databaseProps: KomgaProperties.Database): DataSource {
-    return DataSourceBuilder
+  private fun createDataSource(databaseProps: KomgaProperties.Database): DataSource =
+    DataSourceBuilder
       .create()
       .driverClassName(databaseProps.driverClassName ?: "org.postgresql.Driver")
       .url(databaseProps.url ?: throw IllegalArgumentException("Database URL must be specified"))
       .username(databaseProps.username)
       .password(databaseProps.password)
       .build()
-  }
 
-  private fun calculatePoolSize(databaseProps: KomgaProperties.Database): Int {
-    return when {
+  private fun calculatePoolSize(databaseProps: KomgaProperties.Database): Int =
+    when {
       // Use explicit pool size if specified
       databaseProps.poolSize != null -> databaseProps.poolSize!!
       // Default calculation based on CPU cores
       else -> Runtime.getRuntime().availableProcessors().coerceAtMost(databaseProps.maxPoolSize)
     }
-  }
 }

@@ -17,7 +17,6 @@ private val logger = KotlinLogging.logger {}
  */
 class SeriesSearchHelper(
   val context: SearchContext,
-  private val collationHelper: DatabaseCollationHelper,
 ) : ContentRestrictionsSearchHelper() {
   fun toCondition(searchCondition: SearchCondition.Series?): Pair<Condition, Set<RequiredJoin>> {
     val base = toCondition()
@@ -102,14 +101,14 @@ class SeriesSearchHelper(
               .select(Tables.SERIES_METADATA_TAG.SERIES_ID)
               .from(Tables.SERIES_METADATA_TAG)
               .where(
-                collationHelper.collateUnicode(Tables.SERIES_METADATA_TAG.TAG)
+                Tables.SERIES_METADATA_TAG.TAG
                   .equalIgnoreCase(tag),
               ).union(
                 DSL
                   .select(Tables.BOOK_METADATA_AGGREGATION_TAG.SERIES_ID)
                   .from(Tables.BOOK_METADATA_AGGREGATION_TAG)
                   .where(
-                    collationHelper.collateUnicode(Tables.BOOK_METADATA_AGGREGATION_TAG.TAG)
+                    Tables.BOOK_METADATA_AGGREGATION_TAG.TAG
                       .equalIgnoreCase(tag),
                   ),
               )
@@ -145,13 +144,13 @@ class SeriesSearchHelper(
               .apply {
                 if (name != null)
                   and(
-                    collationHelper.collateUnicode(Tables.BOOK_METADATA_AGGREGATION_AUTHOR.NAME)
+                    Tables.BOOK_METADATA_AGGREGATION_AUTHOR.NAME
                       .equalIgnoreCase(name),
                   )
               }.apply {
                 if (role != null)
                   and(
-                    collationHelper.collateUnicode(Tables.BOOK_METADATA_AGGREGATION_AUTHOR.ROLE)
+                    Tables.BOOK_METADATA_AGGREGATION_AUTHOR.ROLE
                       .equalIgnoreCase(role),
                   )
               }
@@ -211,7 +210,7 @@ class SeriesSearchHelper(
               .select(Tables.SERIES_METADATA_GENRE.SERIES_ID)
               .from(Tables.SERIES_METADATA_GENRE)
               .where(
-                collationHelper.collateUnicode(Tables.SERIES_METADATA_GENRE.GENRE)
+                Tables.SERIES_METADATA_GENRE.GENRE
                   .equalIgnoreCase(genre),
               )
           }
@@ -241,7 +240,7 @@ class SeriesSearchHelper(
               .select(Tables.SERIES_METADATA_SHARING.SERIES_ID)
               .from(Tables.SERIES_METADATA_SHARING)
               .where(
-                collationHelper.collateUnicode(Tables.SERIES_METADATA_SHARING.LABEL)
+                Tables.SERIES_METADATA_SHARING.LABEL
                   .equalIgnoreCase(label),
               )
           }

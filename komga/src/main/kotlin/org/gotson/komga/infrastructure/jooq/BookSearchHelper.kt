@@ -19,7 +19,6 @@ private val logger = KotlinLogging.logger {}
  */
 class BookSearchHelper(
   val context: SearchContext,
-  private val collationHelper: DatabaseCollationHelper,
 ) : ContentRestrictionsSearchHelper() {
   fun toCondition(searchCondition: SearchCondition.Book?): Pair<Condition, Set<RequiredJoin>> {
     val base = toCondition()
@@ -148,7 +147,7 @@ class BookSearchHelper(
               .select(Tables.BOOK_METADATA_TAG.BOOK_ID)
               .from(Tables.BOOK_METADATA_TAG)
               .where(
-                collationHelper.collateUnicode(Tables.BOOK_METADATA_TAG.TAG)
+                Tables.BOOK_METADATA_TAG.TAG
                   .equalIgnoreCase(tag),
               )
           }
@@ -177,13 +176,13 @@ class BookSearchHelper(
               .apply {
                 if (name != null)
                   and(
-                    collationHelper.collateUnicode(Tables.BOOK_METADATA_AUTHOR.NAME)
+                    Tables.BOOK_METADATA_AUTHOR.NAME
                       .equalIgnoreCase(name),
                   )
               }.apply {
                 if (role != null)
                   and(
-                    collationHelper.collateUnicode(Tables.BOOK_METADATA_AUTHOR.ROLE)
+                    Tables.BOOK_METADATA_AUTHOR.ROLE
                       .equalIgnoreCase(role),
                   )
               }

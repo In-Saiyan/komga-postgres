@@ -3,7 +3,6 @@ package org.gotson.komga.infrastructure.jooq.main
 import org.gotson.komga.domain.model.ContentRestrictions
 import org.gotson.komga.domain.model.SeriesCollection
 import org.gotson.komga.domain.persistence.SeriesCollectionRepository
-import org.gotson.komga.infrastructure.jooq.DatabaseCollationHelper
 import org.gotson.komga.infrastructure.jooq.inOrNoCondition
 import org.gotson.komga.infrastructure.jooq.insertTempStrings
 import org.gotson.komga.infrastructure.jooq.selectTempStrings
@@ -33,7 +32,6 @@ import java.time.ZoneId
 class SeriesCollectionDao(
   private val dsl: DSLContext,
   private val luceneHelper: LuceneHelper,
-  private val collationHelper: DatabaseCollationHelper,
   @param:Value("#{@komgaProperties.database.batchChunkSize}") private val batchSize: Int,
 ) : SeriesCollectionRepository {
   private val c = Tables.COLLECTION
@@ -42,9 +40,10 @@ class SeriesCollectionDao(
   private val sd = Tables.SERIES_METADATA
 
   private val sorts
-    get() = mapOf(
-      "name" to collationHelper.collateUnicode(c.NAME),
-    )
+    get() =
+      mapOf(
+        "name" to c.NAME,
+      )
 
   override fun findByIdOrNull(
     collectionId: String,

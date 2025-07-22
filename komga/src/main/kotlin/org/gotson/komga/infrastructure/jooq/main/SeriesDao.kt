@@ -4,7 +4,6 @@ import org.gotson.komga.domain.model.SearchCondition
 import org.gotson.komga.domain.model.SearchContext
 import org.gotson.komga.domain.model.Series
 import org.gotson.komga.domain.persistence.SeriesRepository
-import org.gotson.komga.infrastructure.jooq.DatabaseCollationHelper
 import org.gotson.komga.infrastructure.jooq.RequiredJoin
 import org.gotson.komga.infrastructure.jooq.SeriesSearchHelper
 import org.gotson.komga.infrastructure.jooq.csAlias
@@ -31,7 +30,6 @@ import java.time.ZoneId
 @Component
 class SeriesDao(
   private val dsl: DSLContext,
-  private val collationHelper: DatabaseCollationHelper,
   @param:Value("#{@komgaProperties.database.batchChunkSize}") private val batchSize: Int,
 ) : SeriesRepository {
   private val s = Tables.SERIES
@@ -117,7 +115,7 @@ class SeriesDao(
     searchContext: SearchContext,
     pageable: Pageable,
   ): Page<Series> {
-    val (conditions, joins) = SeriesSearchHelper(searchContext, collationHelper).toCondition(searchCondition)
+    val (conditions, joins) = SeriesSearchHelper(searchContext).toCondition(searchCondition)
     return findAll(conditions, joins, pageable)
   }
 
