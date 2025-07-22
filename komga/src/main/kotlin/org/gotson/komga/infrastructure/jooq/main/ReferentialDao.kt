@@ -245,7 +245,7 @@ class ReferentialDao(
             .on(g.SERIES_ID.eq(s.ID))
             .where(s.LIBRARY_ID.`in`(it))
         }
-      }.orderBy(g.GENRE.collate(collationHelper.collateUnicode()))
+      }.orderBy(collationHelper.collateUnicode(g.GENRE))
       .fetchSet(g.GENRE)
 
   override fun findAllGenresByLibraries(
@@ -259,7 +259,7 @@ class ReferentialDao(
       .on(g.SERIES_ID.eq(s.ID))
       .where(s.LIBRARY_ID.`in`(libraryIds))
       .apply { filterOnLibraryIds?.let { and(s.LIBRARY_ID.`in`(it)) } }
-      .orderBy(g.GENRE.collate(collationHelper.collateUnicode()))
+      .orderBy(collationHelper.collateUnicode(g.GENRE))
       .fetchSet(g.GENRE)
 
   override fun findAllGenresByCollection(
@@ -274,7 +274,7 @@ class ReferentialDao(
       .apply { filterOnLibraryIds?.let { leftJoin(s).on(g.SERIES_ID.eq(s.ID)) } }
       .where(cs.COLLECTION_ID.eq(collectionId))
       .apply { filterOnLibraryIds?.let { and(s.LIBRARY_ID.`in`(it)) } }
-      .orderBy(g.GENRE.collate(collationHelper.collateUnicode()))
+      .orderBy(collationHelper.collateUnicode(g.GENRE))
       .fetchSet(g.GENRE)
 
   override fun findAllSeriesAndBookTags(filterOnLibraryIds: Collection<String>?): Set<String> =
@@ -348,7 +348,7 @@ class ReferentialDao(
             .on(st.SERIES_ID.eq(s.ID))
             .where(s.LIBRARY_ID.`in`(it))
         }
-      }.orderBy(st.TAG.collate(collationHelper.collateUnicode()))
+      }.orderBy(collationHelper.collateUnicode(st.TAG))
       .fetchSet(st.TAG)
 
   override fun findAllSeriesTagsByLibrary(
@@ -362,7 +362,7 @@ class ReferentialDao(
       .on(st.SERIES_ID.eq(s.ID))
       .where(s.LIBRARY_ID.eq(libraryId))
       .apply { filterOnLibraryIds?.let { and(s.LIBRARY_ID.`in`(it)) } }
-      .orderBy(st.TAG.collate(collationHelper.collateUnicode()))
+      .orderBy(collationHelper.collateUnicode(st.TAG))
       .fetchSet(st.TAG)
 
   override fun findAllBookTagsBySeries(
@@ -376,7 +376,7 @@ class ReferentialDao(
       .on(bt.BOOK_ID.eq(b.ID))
       .where(b.SERIES_ID.eq(seriesId))
       .apply { filterOnLibraryIds?.let { and(b.LIBRARY_ID.`in`(it)) } }
-      .orderBy(bt.TAG.collate(collationHelper.collateUnicode()))
+      .orderBy(collationHelper.collateUnicode(bt.TAG))
       .fetchSet(bt.TAG)
 
   override fun findAllBookTagsByReadList(
@@ -392,7 +392,7 @@ class ReferentialDao(
       .on(bt.BOOK_ID.eq(rb.BOOK_ID))
       .where(rb.READLIST_ID.eq(readListId))
       .apply { filterOnLibraryIds?.let { and(b.LIBRARY_ID.`in`(it)) } }
-      .orderBy(bt.TAG.collate(collationHelper.collateUnicode()))
+      .orderBy(collationHelper.collateUnicode(bt.TAG))
       .fetchSet(bt.TAG)
 
   override fun findAllSeriesTagsByCollection(
@@ -407,7 +407,7 @@ class ReferentialDao(
       .apply { filterOnLibraryIds?.let { leftJoin(s).on(st.SERIES_ID.eq(s.ID)) } }
       .where(cs.COLLECTION_ID.eq(collectionId))
       .apply { filterOnLibraryIds?.let { and(s.LIBRARY_ID.`in`(it)) } }
-      .orderBy(st.TAG.collate(collationHelper.collateUnicode()))
+      .orderBy(collationHelper.collateUnicode(st.TAG))
       .fetchSet(st.TAG)
 
   override fun findAllBookTags(filterOnLibraryIds: Collection<String>?): Set<String> =
@@ -420,7 +420,7 @@ class ReferentialDao(
             .on(bt.BOOK_ID.eq(b.ID))
             .where(b.LIBRARY_ID.`in`(it))
         }
-      }.orderBy(bt.TAG.collate(collationHelper.collateUnicode()))
+      }.orderBy(collationHelper.collateUnicode(bt.TAG))
       .fetchSet(bt.TAG)
 
   override fun findAllLanguages(filterOnLibraryIds: Collection<String>?): Set<String> =
@@ -471,7 +471,7 @@ class ReferentialDao(
       .apply { filterOnLibraryIds?.let { leftJoin(s).on(sd.SERIES_ID.eq(s.ID)) } }
       .where(sd.PUBLISHER.ne(""))
       .apply { filterOnLibraryIds?.let { and(s.LIBRARY_ID.`in`(it)) } }
-      .orderBy(sd.PUBLISHER.collate(collationHelper.collateUnicode()))
+      .orderBy(collationHelper.collateUnicode(sd.PUBLISHER))
       .fetchSet(sd.PUBLISHER)
 
   override fun findAllPublishers(
@@ -487,7 +487,7 @@ class ReferentialDao(
         .apply { filterOnLibraryIds?.let { and(s.LIBRARY_ID.`in`(it)) } }
 
     val count = dsl.fetchCount(query)
-    val sort = sd.PUBLISHER.collate(collationHelper.collateUnicode())
+    val sort = collationHelper.collateUnicode(sd.PUBLISHER)
 
     val items =
       query
@@ -518,7 +518,7 @@ class ReferentialDao(
       .where(sd.PUBLISHER.ne(""))
       .and(s.LIBRARY_ID.`in`(libraryIds))
       .apply { filterOnLibraryIds?.let { and(s.LIBRARY_ID.`in`(it)) } }
-      .orderBy(sd.PUBLISHER.collate(collationHelper.collateUnicode()))
+      .orderBy(collationHelper.collateUnicode(sd.PUBLISHER))
       .fetchSet(sd.PUBLISHER)
 
   override fun findAllPublishersByCollection(
@@ -534,7 +534,7 @@ class ReferentialDao(
       .where(sd.PUBLISHER.ne(""))
       .and(cs.COLLECTION_ID.eq(collectionId))
       .apply { filterOnLibraryIds?.let { and(s.LIBRARY_ID.`in`(it)) } }
-      .orderBy(sd.PUBLISHER.collate(collationHelper.collateUnicode()))
+      .orderBy(collationHelper.collateUnicode(sd.PUBLISHER))
       .fetchSet(sd.PUBLISHER)
 
   override fun findAllAgeRatings(filterOnLibraryIds: Collection<String>?): Set<Int?> =
@@ -630,7 +630,7 @@ class ReferentialDao(
             .on(sl.SERIES_ID.eq(s.ID))
             .where(s.LIBRARY_ID.`in`(it))
         }
-      }.orderBy(sl.LABEL.collate(collationHelper.collateUnicode()))
+      }.orderBy(collationHelper.collateUnicode(sl.LABEL))
       .fetchSet(sl.LABEL)
 
   override fun findAllSharingLabelsByLibraries(
@@ -644,7 +644,7 @@ class ReferentialDao(
       .on(sl.SERIES_ID.eq(s.ID))
       .where(s.LIBRARY_ID.`in`(libraryIds))
       .apply { filterOnLibraryIds?.let { and(s.LIBRARY_ID.`in`(it)) } }
-      .orderBy(sl.LABEL.collate(collationHelper.collateUnicode()))
+      .orderBy(collationHelper.collateUnicode(sl.LABEL))
       .fetchSet(sl.LABEL)
 
   override fun findAllSharingLabelsByCollection(
@@ -659,7 +659,7 @@ class ReferentialDao(
       .apply { filterOnLibraryIds?.let { leftJoin(s).on(sl.SERIES_ID.eq(s.ID)) } }
       .where(cs.COLLECTION_ID.eq(collectionId))
       .apply { filterOnLibraryIds?.let { and(s.LIBRARY_ID.`in`(it)) } }
-      .orderBy(sl.LABEL.collate(collationHelper.collateUnicode()))
+      .orderBy(collationHelper.collateUnicode(sl.LABEL))
       .fetchSet(sl.LABEL)
 
   private fun BookMetadataAuthorRecord.toDomain(): Author =

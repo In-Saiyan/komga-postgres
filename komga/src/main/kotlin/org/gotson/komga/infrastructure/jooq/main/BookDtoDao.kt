@@ -86,7 +86,7 @@ class BookDtoDao(
       "media.comment" to m.COMMENT.noCase(),
       "media.mediaType" to m.MEDIA_TYPE.noCase(),
       "media.pagesCount" to m.PAGE_COUNT,
-      "metadata.title" to d.TITLE.collate(collationHelper.collateUnicode()),
+      "metadata.title" to collationHelper.collateUnicode(d.TITLE),
       "metadata.numberSort" to d.NUMBER_SORT,
       "metadata.releaseDate" to d.RELEASE_DATE,
       "readProgress.lastModified" to r.LAST_MODIFIED_DATE,
