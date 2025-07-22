@@ -258,12 +258,12 @@ val postgresMigrationDirs =
     "main" to
       listOf(
         "$projectDir/src/flyway/resources/db/migration/postgresql",
-        "$projectDir/src/flyway/kotlin/db/migration/postgresql",
+//        "$projectDir/src/flyway/kotlin/db/migration/postgresql",
       ),
     "tasks" to
       listOf(
         "$projectDir/src/flyway/resources/tasks/migration/postgresql",
-//    "$projectDir/src/flyway/kotlin/tasks/migration/postgresql",
+//        "$projectDir/src/flyway/kotlin/tasks/migration/postgresql",
       ),
   )
 
@@ -309,6 +309,9 @@ tasks.register("flywayMigrateTasks", FlywayMigrateTask::class) {
 }
 
 buildscript {
+  dependencies {
+    classpath("org.flywaydb:flyway-database-postgresql:11.7.2")
+  }
   configurations["classpath"].resolutionStrategy.eachDependency {
     if (requested.group.startsWith("org.jooq") && requested.name.startsWith("jooq")) {
       useVersion("3.19.24")
