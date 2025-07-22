@@ -334,6 +334,8 @@ jooq {
         generator.apply {
           database.apply {
             name = "org.jooq.meta.postgres.PostgresDatabase"
+            inputSchema = "public"
+            excludes = "pg_catalog.*|information_schema.*"
           }
           target.apply {
             packageName = "org.gotson.komga.jooq.main"
@@ -353,6 +355,8 @@ jooq {
         generator.apply {
           database.apply {
             name = "org.jooq.meta.postgres.PostgresDatabase"
+            inputSchema = "public"
+            excludes = "pg_catalog.*|information_schema.*"
           }
           target.apply {
             packageName = "org.gotson.komga.jooq.tasks"
