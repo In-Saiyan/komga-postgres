@@ -25,6 +25,11 @@ class DataSourcesConfiguration(
         this.maximumPoolSize = 1
       }
 
+  @Bean("tasksMigrationDataSource")
+  fun tasksMigrationDataSource(): DataSource =
+    // Create a separate datasource for Flyway migrations to avoid connection pool conflicts
+    createDataSource(komgaProperties.tasksDb)
+
   private fun buildDataSource(
     poolName: String,
     databaseProps: KomgaProperties.Database,

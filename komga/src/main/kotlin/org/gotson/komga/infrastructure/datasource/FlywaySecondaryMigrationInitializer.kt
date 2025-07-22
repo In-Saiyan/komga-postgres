@@ -8,15 +8,16 @@ import javax.sql.DataSource
 
 @Component
 class FlywaySecondaryMigrationInitializer(
-  @Qualifier("tasksDataSource")
-  private val tasksDataSource: DataSource,
+  @Qualifier("tasksMigrationDataSource")
+  private val tasksMigrationDataSource: DataSource,
 ) : InitializingBean {
   // by default Spring Boot will perform migration only on the @Primary datasource
+  // Use a separate datasource for migrations to avoid connection pool conflicts
   override fun afterPropertiesSet() {
     Flyway
       .configure()
-      .locations("classpath:tasks/migration/postgres")
-      .dataSource(tasksDataSource)
+      .locations("classpath:tasks/migration/postgresql")
+      .dataSource(tasksMigrationDataSource)
       .load()
       .apply {
         migrate()
