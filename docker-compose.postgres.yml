@@ -45,22 +45,6 @@ services:
       "
     restart: "no"
 
-  # Optional: pgAdmin for database management
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: komga-pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@komga.local
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "8082:80"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - komga-network
-
 networks:
   komga-network:
     driver: bridge

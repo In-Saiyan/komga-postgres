@@ -1,12 +1,12 @@
 komga:
   workspace: localdb
   database:
-    url: jdbc:postgresql://localhost:5433/komga_\${komga.workspace}
+    url: jdbc:postgresql://localhost:5433/komga
     username: komga
     password: komga_password
     driver-class-name: org.postgresql.Driver
   tasks-db:
-    url: jdbc:postgresql://localhost:5433/komga_\${komga.workspace}_tasks
+    url: jdbc:postgresql://localhost:5433/komga_tasks
     username: komga
     password: komga_password
     driver-class-name: org.postgresql.Driver
