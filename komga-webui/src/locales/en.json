@@ -1087,6 +1087,6 @@
   "welcome": {
     "add_library": "Add library",
     "no_libraries_yet": "No libraries have been added yet!",
-    "welcome_message": "Welcome to Komga"
+    "welcome_message": "Welcome to Komga-Postgres"
   }
 }
