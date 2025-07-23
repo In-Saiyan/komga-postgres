@@ -35,7 +35,14 @@ spring:
   codec:
     max-in-memory-size: 10MB
   flyway:
-    enabled: false
+    enabled: true
+    locations: classpath:db/migration/postgresql
+    mixed: true
+    placeholders:
+      library-file-hashing: \${komga.file-hashing:true}
+      library-scan-startup: \${komga.libraries-scan-startup:false}
+      delete-empty-collections: \${komga.delete-empty-collections:true}
+      delete-empty-read-lists: \${komga.delete-empty-read-lists:true}
   thymeleaf:
     prefix: classpath:/public/
   mvc:

@@ -1,2 +1,12 @@
 komga:
   kobo.kepubify-path: /usr/bin/kepubify
+  database:
+    url: jdbc:postgresql://postgres:5432/komga
+    username: komga
+    password: komga_password
+    driver-class-name: org.postgresql.Driver
+  tasks-db:
+    url: jdbc:postgresql://postgres:5432/komga_tasks
+    username: komga
+    password: komga_password  
+    driver-class-name: org.postgresql.Driver

@@ -55,7 +55,7 @@ class KomgaProperties {
     var poolSize: Int? = null
 
     @get:Positive
-    var maxPoolSize: Int = 1
+    var maxPoolSize: Int = 16
   }
 
   class Fonts {
