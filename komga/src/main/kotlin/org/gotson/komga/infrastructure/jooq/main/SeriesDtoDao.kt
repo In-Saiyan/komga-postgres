@@ -169,7 +169,7 @@ class SeriesDtoDao(
         }
       }.where(conditionsRefined)
       .and(searchCondition)
-      .groupBy(firstChar)
+      .groupBy(d.TITLE_SORT, firstChar)
       .map {
         GroupCountDto(it.value1(), it.value2())
       }
