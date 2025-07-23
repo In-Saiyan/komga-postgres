@@ -250,8 +250,8 @@ springBoot {
 
 val postgresUrls =
   mapOf(
-    "main" to "jdbc:postgresql://localhost:5433/komga",
-    "tasks" to "jdbc:postgresql://localhost:5433/komga_tasks",
+    "main" to "jdbc:postgresql://localhost:5432/komga",
+    "tasks" to "jdbc:postgresql://localhost:5432/komga_tasks",
   )
 val postgresMigrationDirs =
   mapOf(
