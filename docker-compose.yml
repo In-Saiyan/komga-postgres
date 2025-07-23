@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: komga-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: komga
+      POSTGRES_USER: komga
+      POSTGRES_PASSWORD: komga_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - komga-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U komga -d komga"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Create additional databases for tasks
+  postgres-setup:
+    image: postgres:16-alpine
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: komga
+      PGPASSWORD: komga_password
+      PGDATABASE: komga
+    networks:
+      - komga-network
+    command: |
+      sh -c "
+        echo 'Creating additional databases...'
+        psql -v ON_ERROR_STOP=1 -c 'CREATE DATABASE komga_tasks OWNER komga;' || echo 'komga_tasks already exists'
+        echo 'Database setup completed!'
+      "
+    restart: "no"
+
+  # Komga application built from your source code
+  komga:
+    image: komga:postgresql-v2
+    build:
+      context: .
+      dockerfile: Dockerfile
+      tags:
+        - komga:postgresql-v2
+        - komga:latest
+    container_name: komga
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      postgres-setup:
+        condition: service_completed_successfully
+    environment:
+      # Memory settings
+      - JAVA_TOOL_OPTIONS=-Xmx8g
+    ports:
+      - "8080:25600"
+    volumes:
+      # Mount your config directory
+      - ./path/to/config:/config
+      # Mount your data directory - UPDATE THIS PATH
+      - ./path/to/comic:/comic
+    user: "1000:1000"
+    networks:
+      - komga-network
+
+volumes:
+  postgres_data:
+
+networks:
+  komga-network:
+    driver: bridge
