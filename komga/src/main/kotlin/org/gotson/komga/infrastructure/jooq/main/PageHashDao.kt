@@ -47,7 +47,7 @@ class PageHashDao(
       "hash" to p.FILE_HASH,
       "fileSize" to p.FILE_SIZE,
       "matchCount" to DSL.field("count"),
-      "totalSize" to DSL.field("totalSize"),
+      "totalSize" to DSL.field("totalsize"),
       "url" to b.URL,
       "bookId" to b.ID,
       "pageNumber" to p.NUMBER,
@@ -102,7 +102,7 @@ class PageHashDao(
           p.FILE_HASH,
           p.FILE_SIZE,
           bookCount.`as`("count"),
-          (bookCount * p.FILE_SIZE).`as`("totalSize"),
+          (bookCount * p.FILE_SIZE).`as`("totalsize"),
         ).from(p)
         .where(p.FILE_HASH.ne(""))
         .and(
