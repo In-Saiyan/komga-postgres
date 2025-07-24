@@ -7,7 +7,6 @@ import org.gotson.komga.domain.model.SearchContext
 import org.gotson.komga.infrastructure.jooq.BookSearchHelper
 import org.gotson.komga.infrastructure.jooq.RequiredJoin
 import org.gotson.komga.infrastructure.jooq.insertTempStrings
-import org.gotson.komga.infrastructure.jooq.noCase
 import org.gotson.komga.infrastructure.jooq.rlbAlias
 import org.gotson.komga.infrastructure.jooq.selectTempStrings
 import org.gotson.komga.infrastructure.jooq.sortByValues
@@ -80,10 +79,10 @@ class BookDtoDao(
         "fileSize" to b.FILE_SIZE,
         "size" to b.FILE_SIZE,
         "fileHash" to b.FILE_HASH,
-        "url" to b.URL.noCase(),
-        "media.status" to m.STATUS.noCase(),
-        "media.comment" to m.COMMENT.noCase(),
-        "media.mediaType" to m.MEDIA_TYPE.noCase(),
+        "url" to b.URL,
+        "media.status" to m.STATUS,
+        "media.comment" to m.COMMENT,
+        "media.mediaType" to m.MEDIA_TYPE,
         "media.pagesCount" to m.PAGE_COUNT,
         "metadata.title" to d.TITLE,
         "metadata.numberSort" to d.NUMBER_SORT,

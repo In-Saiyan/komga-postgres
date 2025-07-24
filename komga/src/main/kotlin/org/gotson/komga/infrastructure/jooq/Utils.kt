@@ -15,8 +15,6 @@ import java.io.ByteArrayOutputStream
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
-fun Field<String>.noCase() = this.collate("NOCASE")
-
 fun Sort.toOrderBy(sorts: Map<String, Field<out Any>>): List<SortField<out Any>> =
   this.mapNotNull {
     it.toSortField(sorts)

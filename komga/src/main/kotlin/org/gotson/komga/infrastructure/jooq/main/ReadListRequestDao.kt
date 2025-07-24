@@ -5,7 +5,6 @@ import org.gotson.komga.domain.model.ReadListRequestBookMatchBook
 import org.gotson.komga.domain.model.ReadListRequestBookMatchSeries
 import org.gotson.komga.domain.model.ReadListRequestBookMatches
 import org.gotson.komga.domain.persistence.ReadListRequestRepository
-import org.gotson.komga.infrastructure.jooq.noCase
 import org.gotson.komga.jooq.main.Tables
 import org.jooq.DSLContext
 import org.jooq.impl.DSL.ltrim
@@ -43,7 +42,7 @@ class ReadListRequestDao(
           bma.RELEASE_DATE,
         ).from(requestsTable)
         .innerJoin(sd)
-        .on(requestsTable.field(seriesField, String::class.java)?.eq(sd.TITLE.noCase()))
+        .on(requestsTable.field(seriesField, String::class.java)?.eq(sd.TITLE))
         .leftJoin(bma)
         .on(sd.SERIES_ID.eq(bma.SERIES_ID))
         .innerJoin(b)
@@ -52,7 +51,7 @@ class ReadListRequestDao(
         .on(
           b.ID
             .eq(bd.BOOK_ID)
-            .and(ltrim(bd.NUMBER, value("0")).eq(ltrim(requestsTable.field(numberField, String::class.java), value("0")).noCase())),
+            .and(ltrim(bd.NUMBER, value("0")).eq(ltrim(requestsTable.field(numberField, String::class.java), value("0")))),
         ).fetchGroups(requestsTable.field(indexField, Int::class.java))
         .mapValues { (_, records) ->
           // use the requests index to match results
