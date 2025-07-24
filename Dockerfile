@@ -28,7 +28,9 @@ RUN apt-get update && \
 RUN service postgresql start && \
     sudo -u postgres psql -c "CREATE USER komga WITH PASSWORD 'komga_password' SUPERUSER;" && \
     sudo -u postgres createdb -O komga komga && \
-    sudo -u postgres createdb -O komga komga_tasks
+    sudo -u postgres createdb -O komga komga_tasks && \
+    sudo -u postgres psql -d komga -c "CREATE EXTENSION IF NOT EXISTS unaccent;" && \
+    sudo -u postgres psql -d komga_tasks -c "CREATE EXTENSION IF NOT EXISTS unaccent;"
 
 # Build the application (following release.yml build commands)
 # JOOQ needs PostgreSQL to generate correct schema

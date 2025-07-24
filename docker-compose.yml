@@ -20,7 +20,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # Create additional databases for tasks
+  # Create additional databases for tasks and enable extensions
   postgres-setup:
     image: postgres:16-alpine
     depends_on:
@@ -36,8 +36,10 @@ services:
       - komga-network
     command: |
       sh -c "
-        echo 'Creating additional databases...'
+        echo 'Creating additional databases and enabling extensions...'
         psql -v ON_ERROR_STOP=1 -c 'CREATE DATABASE komga_tasks OWNER komga;' || echo 'komga_tasks already exists'
+        psql -v ON_ERROR_STOP=1 -c 'CREATE EXTENSION IF NOT EXISTS unaccent;'
+        psql -v ON_ERROR_STOP=1 -d komga_tasks -c 'CREATE EXTENSION IF NOT EXISTS unaccent;'
         echo 'Database setup completed!'
       "
     restart: "no"
