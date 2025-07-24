@@ -168,7 +168,7 @@ class ReadListDao(
 
   private fun selectBase(joinOnSeriesMetadata: Boolean = false) =
     dsl
-      .selectDistinct(*rl.fields())
+      .select(*rl.fields())
       .from(rl)
       .leftJoin(rlb)
       .on(rl.ID.eq(rlb.READLIST_ID))
@@ -181,6 +181,7 @@ class ReadListDao(
     restrictions: ContentRestrictions = ContentRestrictions(),
   ): List<ReadList> =
     fetchInto(rl)
+      .distinctBy { it.id }
       .map { rr ->
         val bookIds =
           dsl

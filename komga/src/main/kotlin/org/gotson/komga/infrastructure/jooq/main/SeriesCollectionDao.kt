@@ -166,7 +166,7 @@ class SeriesCollectionDao(
 
   private fun selectBase(joinOnSeriesMetadata: Boolean = false) =
     dsl
-      .selectDistinct(*c.fields())
+      .select(*c.fields())
       .from(c)
       .leftJoin(cs)
       .on(c.ID.eq(cs.COLLECTION_ID))
@@ -179,6 +179,7 @@ class SeriesCollectionDao(
     restrictions: ContentRestrictions = ContentRestrictions(),
   ): List<SeriesCollection> =
     fetchInto(c)
+      .distinctBy { it.id }
       .map { cr ->
         val seriesIds =
           dsl
