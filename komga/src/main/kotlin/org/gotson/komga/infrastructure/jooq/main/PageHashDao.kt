@@ -112,7 +112,7 @@ class PageHashDao(
               .from(ph)
               .where(ph.HASH.eq(p.FILE_HASH)),
           ),
-        ).groupBy(p.FILE_HASH)
+        ).groupBy(p.FILE_HASH, p.FILE_SIZE)
         .having(DSL.count(p.BOOK_ID).gt(1))
 
     val count = dsl.fetchCount(query)
