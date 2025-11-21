@@ -43,7 +43,7 @@ jobs:
       version_next: ${{ steps.versions.outputs.version_next }}
       should_release: ${{ steps.versions.outputs.should_release }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Set up Homebrew
@@ -72,7 +72,7 @@ jobs:
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -167,7 +167,7 @@ jobs:
           echo $APPLE_PRIVATE_KEY | base64 --decode > ./secret/apple_private_key.p8
 
       - name: Conveyor make copied-site
-        uses: hydraulic-software/conveyor/actions/build@v18.1
+        uses: hydraulic-software/conveyor/actions/build@v20.0
         if: inputs.conveyor-copied-site
         with:
           command: --cache-limit=2.0 -f conveyor.ci.conf make copied-site -o ./output/site
@@ -220,7 +220,7 @@ jobs:
             build/jreleaser/output.properties
 
       - name: Conveyor - publish to Microsoft Store
-        uses: hydraulic-software/conveyor/actions/build@v18.1
+        uses: hydraulic-software/conveyor/actions/build@v20.0
         if: inputs.msstore_release
         with:
           command: --cache-limit=2.0 -f conveyor.msstore.ci.conf make ms-store-release -o ./output/msstore
@@ -246,7 +246,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@v4
         with:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: gotson/komga-website
